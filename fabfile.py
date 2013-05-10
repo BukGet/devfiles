@@ -38,7 +38,13 @@ def new_bukget():
     #  * mongo-10gen-server         - The MongoDB Service itself
     #  * nginx                      - The front-end web server
     #  * anacron                    - A cron daemon
-    run('yum -y install python-devel libyaml libyaml-devel mongo-10gen mongo-10gen-server nginx')
+    run('yum -y install python-devel libyaml libyaml-devel mongo-10gen mongo-10gen-server nginx ntp')
+
+    # Lets make sure that time on this server does drift, so first fix the time
+    # then enable the ntp service.
+    run('ntpdate time.centos.org')
+    run('chkconfig --levels 2345 ntpd on')
+    run('service ntpd start')
 
     # Lets go ahead and make sure that MongoDB and Nginx startup at boot.
     run('chkconfig --levels 2345 mongod on')
