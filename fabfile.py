@@ -198,7 +198,7 @@ def backup_db():
 
     # Pull the backup into the backups folder then remove the remote copy as its
     # no longer needed.
-    get('/tmp/%s' name, '/backups/db/')
+    get('/tmp/%s' % name, '/backups/db/')
     run('rm -f /tmp/%s' % name)
 
 
