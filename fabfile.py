@@ -75,8 +75,58 @@ def new_bukget():
     # just call that function.
     upgrade_api()
 
-    # Lastly, we can start the api up.
+    # Now, lets start the api up.
     run('initctl start bukget')
+    print 'Install & Prep Complete!  Please run either make_prod or make_dev.'
+
+
+@task
+def make_prod():
+    '''
+    Makes the necessary configuration changes to turn a given host into a
+    production API server.
+    '''
+    # Step 1: Turn on any services that dev servers have disabled by default:
+    run('chkconfig --levels 2345 iptables on')
+    if 'Firewall is not running' in run('service iptables status'):
+        run('service iptables start')
+
+    # We need to adjust the IPTables rules to block communication on
+    # non-essential ports, restrict SSH communication from the outside world,
+    # and generally just lock things down a touch.
+    run('iptables -F INPUT')
+    run('iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT')
+    run('iptables -A INPUT -p icmp -j ACCEPT')
+    run('iptables -A INPUT -i lo -j ACCEPT')
+
+    # Allows anything from Hamachi-space.  As this is our back-channel VPN, this
+    # should always be the case.
+    run('iptables -A INPUT --src 25.0.0.0/8 -j ACCEPT')
+
+    # Also allow SSH from the bukget.org webhost.  This is a failsafe incase
+    # Hamachi is down & we have issues with the API servers.
+    run('iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 22 --src 70.32.35.194 -j ACCEPT')
+
+    # We also kinda need to enable port 80 for all the web traffic we expect ;)
+    run('iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT')
+
+    # Lastly, lets finish this off and save the iptables config.
+    run('iptables -A INPUT -j REJECT --reject-with icmp-host-prohibited')
+    run('iptables -A FORWARD -j REJECT --reject-with icmp-host-prohibited')
+    run('service iptables save')
+
+
+@task
+def make_dev():
+    '''
+    Sets the Machine up for development use.  These machines should never be 
+    exposed directly to the internet, as this process (among other things)
+    disables the host firewall for full access to the host.
+    '''
+    run('service iptables stop')
+    run('service ip6tables stop')
+    run('chkconfig iptables off')
+    run('chkconfig ip6tables off')
 
 
 @task
@@ -123,13 +173,17 @@ def hamachi():
     # does require Steve to login to his hamachi account and manually add the
     # server to the network however.
     run('hamachi login')
-    run('hamachi join 170-613-561')
+    run('hamachi do-join 170-613-561 ""')
 
 
 @task
 def install_vmware_tools():
     '''VMWare Tools Installation.'''
     if 'VMware' in run('cat /proc/scsi/scsi'):
+        # This is specific to ESXi 5.1.  I havent tested on earlier versions
+        # of ESXi as well, so I don't know if these packages are locked into
+        # only the most recent version or not, however this should install
+        # the packages needed for VMWare if the box is infact a vmware guest.
         run('rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub')
         run('rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub')
         run('curl -o /etc/yum.repos.d/vmware-tools.repo https://raw.github.com/BukGet/devfiles/master/templates/vmware-tools.repo')
