@@ -1,12 +1,12 @@
 from fabric.api import *
 from fabric.contrib import *
-from settings import *
+#from settings import *
 import time
 
 
 @task
 def new_bukget():
-    '''Preps a fresh CentOS 6 installation and installs he BukGet services.'''
+    '''Preps a fresh CentOS 6 installation and installs the BukGet services.'''
     env.warn_only = True        # Just setting this incase we need it.
 
     # First thing we need to do is update the system to current and install
@@ -14,6 +14,10 @@ def new_bukget():
     # the python packages.
     run('yum -y update')
     run('yum -y groupinstall "Development Tools"')
+
+    # For some reason, this package is installed by default, however all it
+    # doesn in 99% of cases is span the system log, so lets pull it out.
+    run('yum -y remove lldpad')
 
     # Next we will run the VMWare Tools installer.  If the box isn't a VMWare
     # VM, it will just skip through, so it doesnt hurt to run that here.
@@ -28,7 +32,7 @@ def new_bukget():
     run('curl -o /etc/yum.repos.d/10gen.repo https://raw.github.com/BukGet/devfiles/master/templates/10gen.repo')
 
     # Next we will need to install the following packages:
-    #  * python-devel               - Needed to byte-compile somee python packages
+    #  * python-devel               - Needed to byte-compile python libraries
     #  * libyaml & libyaml-devel    - Needed to byte-compile pyyaml
     #  * mongo-10gen                - MongoDB Tools
     #  * mongo-10gen-server         - The MongoDB Service itself
@@ -119,7 +123,6 @@ def hamachi():
     # does require Steve to login to his hamachi account and manually add the
     # server to the network however.
     run('hamachi login')
-    run('hamachi attach %s' % hamachi_login)
     run('hamachi join 170-613-561')
 
 
@@ -129,5 +132,5 @@ def install_vmware_tools():
     if 'VMware' in run('cat /proc/scsi/scsi'):
         run('rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub')
         run('rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub')
-        put('%s/vmware-tools.repo' % pkg_dir, '/etc/yum.repos.d/vmware-tools.repo')
+        run('curl -o /etc/yum.repos.d/vmware-tools.repo https://raw.github.com/BukGet/devfiles/master/templates/vmware-tools.repo')
         run('yum -y install vmware-tools-esx-kmods vmware-open-vm-tools-nox')
