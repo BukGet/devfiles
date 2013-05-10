@@ -1,6 +1,7 @@
 from fabric.api import *
 from fabric.contrib import *
 #from settings import *
+import datetime
 import time
 
 
@@ -16,7 +17,7 @@ def new_bukget():
     run('yum -y groupinstall "Development Tools"')
 
     # For some reason, this package is installed by default, however all it
-    # doesn in 99% of cases is span the system log, so lets pull it out.
+    # does in 99% of cases is span the system log, so lets pull it out.
     run('yum -y remove lldpad')
 
     # Next we will run the VMWare Tools installer.  If the box isn't a VMWare
@@ -50,7 +51,7 @@ def new_bukget():
     run('chkconfig --levels 2345 mongod on')
     run('chkconfig --levels 2345 nginx on')
 
-    # Also, we will need to download the Nginx Ttemplate config.  This config
+    # Also, we will need to download the Nginx template config.  This config
     # file is a pre-configured vhost for the bukget API.  We will need to
     # replace the hostname placeholder with the actual hostname.
     hostname = run('hostname')
@@ -61,7 +62,7 @@ def new_bukget():
     # it ;)
     run('mkdir /var/log/bukget')
 
-    # New we should be able to start all of these services up :D
+    # Now we should be able to start all of these services up :D
     run('service nginx start')
     run('service mongod start')
 
@@ -180,6 +181,41 @@ def hamachi():
     # server to the network however.
     run('hamachi login')
     run('hamachi do-join 170-613-561 ""')
+
+
+@task
+def backup_db():
+    '''BukGet Database Backup'''
+    # Get todays date and then generate the name of the backup file.
+    date = datetime.date.today()
+    name = 'bukget-db.%s.%s.%s.tar.gz dump' % (date.year, date.month, date.day)
+
+    # Generate the dump, then 
+    with cd('/tmp'):
+        run('mongodump -d bukget')
+        run('tar czf %s dump' % name)
+        run('rm -rf /tmp/dump')
+
+    # Pull the backup into the backups folder then remove the remote copy as its
+    # no longer needed.
+    get('/tmp/%s' name, '/backups/db/')
+    run('rm -f /tmp/%s' % name)
+
+
+@task
+def dev_import_backup():
+    '''Restore Archived Backup Database into Dev Environment'''
+    # Firgure out what yesterdays database archive was named...
+    date = datetime.date.today() - datetime.datedelta(days=-1)
+    name = 'bukget-db.%s.%s.%s.tar.gz dump' % (date.year, date.month, date.day)
+
+    # Now to perform the restore.
+    put('/backups/db/%s' % name, '/tmp/backup.tar.gz')
+    with cd('/tmp'):
+        if files.exists('/tmp/dump'):
+            run('rm -rf /tmp/dump')
+        run('tar xzf backup.tar.gz')
+        run('mongorestore -d bukget --drop')
 
 
 @task
