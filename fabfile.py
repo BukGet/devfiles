@@ -4,12 +4,14 @@ from fabric.contrib import *
 import datetime
 import time
 
+env.key_filename = '/opt/keys/id_rsa'
 
 @task
 def new_bukget():
     '''Preps a fresh CentOS 6 installation and installs the BukGet services.'''
     env.warn_only = True        # Just setting this incase we need it.
 
+    send_sshkey()
     # First thing we need to do is update the system to current and install
     # the Development Tools package group as these will be used to build in
     # the python packages.
@@ -216,6 +218,25 @@ def dev_import_backup():
             run('rm -rf /tmp/dump')
         run('tar xzf backup.tar.gz')
         run('mongorestore -d bukget --drop')
+
+
+@task(alias='sshkey')
+def send_sshkey(keyfile='/opt/keys/id_rsa.pub'):
+    env.warn_only = True        # We need this flag set for restorecon.  It only
+                                # exists for redhat hosts so it may not fire on
+                                # everything.
+    pubkey = open(keyfile).read()
+    if not files.exists('/root/.ssh'):
+        run('mkdir /root/.ssh')
+    if files.exists('/root/.ssh/authorized_keys') and files.contains('/root/.ssh/authorized_keys', pubkey):
+        pass
+    else:
+        if not files.exists('/root/.ssh/authorized_keys'):
+            run('touch /root/.ssh/authorized_keys')
+        files.append('/root/.ssh/authorized_keys', pubkey)
+    run('chmod 0700 /root/.ssh')
+    run('chmod 0600 /root/.ssh/authorized_keys')
+    run('restorecon -R -v /root/.ssh')
 
 
 @task
