@@ -188,7 +188,7 @@ def backup_db():
     '''BukGet Database Backup'''
     # Get todays date and then generate the name of the backup file.
     date = datetime.date.today()
-    name = 'bukget-db.%s.%s.%s.tar.gz dump' % (date.year, date.month, date.day)
+    name = 'bukget-db.%s.%s.%s.tar.gz' % (date.year, date.month, date.day)
 
     # Generate the dump, then 
     with cd('/tmp'):
