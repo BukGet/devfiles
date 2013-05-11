@@ -193,7 +193,7 @@ def backup_db():
     # Generate the dump, then 
     with cd('/tmp'):
         run('mongodump -d bukget')
-        run('tar czf %s dump' % name)
+        run('tar czf /tmp/%s dump' % name)
         run('rm -rf /tmp/dump')
 
     # Pull the backup into the backups folder then remove the remote copy as its
