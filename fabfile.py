@@ -41,32 +41,36 @@ def new_bukget():
     #  * mongo-10gen-server         - The MongoDB Service itself
     #  * nginx                      - The front-end web server
     #  * anacron                    - A cron daemon
-    run('yum -y install python-devel libyaml libyaml-devel mongo-10gen mongo-10gen-server nginx ntp')
+    run('yum -y install python-devel libyaml libyaml-devel mongo-10gen mongo-10gen-server nginx ntp anacron')
 
     # Lets make sure that time on this server does drift, so first fix the time
     # then enable the ntp service.
     run('ntpdate time.centos.org')
     run('chkconfig --levels 2345 ntpd on')
     run('service ntpd start')
+    run('service crond start')
 
     # Lets go ahead and make sure that MongoDB and Nginx startup at boot.
     run('chkconfig --levels 2345 mongod on')
     run('chkconfig --levels 2345 nginx on')
+    run('chkconfig --levels 2345 postfix on')
+    run('chkconfig --levels 2345 crond on')
+    run('curl -o /etc/logrotate.d/bukget https://raw.github.com/BukGet/devfiles/master/templates/logrotate.conf')
+    run('curl -o /etc/cron.d/0hourly https://raw.github.com/BukGet/devfiles/master/templates/cronhourlyfix.conf')
 
-    # Also, we will need to download the Nginx template config.  This config
-    # file is a pre-configured vhost for the bukget API.  We will need to
-    # replace the hostname placeholder with the actual hostname.
-    hostname = run('hostname')
-    run('curl -o /etc/nginx/conf.d/api.bukget.org.conf https://raw.github.com/BukGet/devfiles/master/templates/nginx_vhost.conf')
-    files.sed('/etc/nginx/conf.d/api.bukget.org.conf', '@HOSTNAME@', hostname)
+    # A couple of things that we need to do for postfix, mainly update the
+    # aliases to point root traffic to our group.
+    files.append('/etc/aliases', 'root:     staff@bukget.org')
+    run('newaliases')
 
+    config_nginx()
     # As just about everything depends on this folder, lets go ahead and create
     # it ;)
     run('mkdir /var/log/bukget')
 
     # Now we should be able to start all of these services up :D
-    run('service nginx start')
     run('service mongod start')
+    run('service postfix start')
 
     # Now, we need to install pip.  We use pip to pull in the dependencies for
     # the BukGet packages.  Lets also clean up the tarball that the distribute
@@ -159,6 +163,20 @@ def upgrade_generator():
         files.append('/etc/crontab', cronjob)
     if not files.contains('/etc/crontab', logreader):
         files.append('/etc/crontab', logreader)
+
+
+@task
+def config_nginx():
+    '''Nginx Configuration'''
+    env.warn_only = True        # Just setting this incase we need it.
+
+    # We will need to download the Nginx template config.  This config
+    # file is a pre-configured vhost for the bukget API.  We will need to
+    # replace the hostname placeholder with the actual hostname.
+    hostname = run('hostname')
+    run('curl -o /etc/nginx/conf.d/api.bukget.org.conf https://raw.github.com/BukGet/devfiles/master/templates/nginx_vhost.conf')
+    files.sed('/etc/nginx/conf.d/api.bukget.org.conf', '@HOSTNAME@', hostname)
+    run('service nginx restart')
 
 
 @task
