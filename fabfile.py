@@ -55,6 +55,8 @@ def new_bukget():
     run('chkconfig --levels 2345 nginx on')
     run('chkconfig --levels 2345 postfix on')
     run('chkconfig --levels 2345 crond on')
+
+    # Make the Necessary pulls for logrotate and cront o function properly.
     run('curl -o /etc/logrotate.d/bukget https://raw.github.com/BukGet/devfiles/master/templates/logrotate.conf')
     run('curl -o /etc/cron.d/0hourly https://raw.github.com/BukGet/devfiles/master/templates/cronhourlyfix.conf')
 
