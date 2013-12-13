@@ -190,7 +190,7 @@ def hamachi():
     # LSB packages installed, we will first install that before installing
     # the Hamachi package.
     run('yum -y install redhat-lsb')
-    run('yum -y install https://secure.logmein.com/labs/logmein-hamachi-2.1.0.86-1.x86_64.rpm')
+    run('yum -y install http://pkgs.chigeek.com/logmein-hamachi-2.1.0.101-1.x86_64.rpm')
     run('service logmein-hamachi start')
 
     # We need to wait a couple of seconds after installing hamachi to make sure everything has
