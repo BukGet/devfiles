@@ -22,4 +22,6 @@ vzctl set ${VEID} --save --numtcpsock 1000:1000
 vzctl set ${VEID} --save --oomguarpages 262144
 vzctl set ${VEID} --save --kmemsize 31457280:34603008
 vzctl start ${VEID}
-vzctl exec ${VEID} 
+vzctl exec ${VEID} sed -i "s/database_host = localhost/database_host = ${HOSTBOX}.vpn.bukget.org" /etc/bukget/api.conf
+vzctl exec ${VEID} initctl stop bukget
+vzctl exec ${VEID} initctl start bukget
