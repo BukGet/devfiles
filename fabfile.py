@@ -271,3 +271,16 @@ def install_vmware_tools():
         run('rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub')
         run('curl -o /etc/yum.repos.d/vmware-tools.repo https://raw.github.com/BukGet/devfiles/master/templates/vmware-tools.repo')
         run('yum -y install vmware-tools-esx-kmods vmware-open-vm-tools-nox')
+
+@task
+def install_nodeapi():
+    '''NodeAPI Installation.'''
+    run('yum install npm')
+    run('npm install -g forever')
+    with cd('/opt'):
+        run('git clone git://github.com/BukGet/nodeapi.git')
+    with cd('/opt/nodeapi'):
+        run('npm install')    
+    cronjob = '@reboot root forever start /opt/nodeapi/index.js'
+    if not files.contains('/etc/crontab', cronjob):
+        files.append('/etc/crontab', cronjob)
