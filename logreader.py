@@ -55,7 +55,7 @@ class LogParser(object):
         no matches (i.e. a good UA string) then return the string, otherwise
         return False.
         '''
-        ua_string = self.ua.findall(line)
+        ua_string = self.ua.findall(line.lower())
         if len(ua_string) > 0:
             ua_string = ua_string[0]
         else:
@@ -136,8 +136,8 @@ class LogParser(object):
                 uastring = self.ignore_ua(line)
                 if uastring:
                     if uastring.lower() not in data['user_agents']:
-                        data['user_agents'][uastring] = 0
-                    data['user_agents'][uastring] += 1
+                        data['user_agents'][uastring.lower()] = 0
+                    data['user_agents'][uastring.lower()] += 1
 
                 # We should also print out any 500 errors so that cron will
                 # email out the resulting output to the admins.
