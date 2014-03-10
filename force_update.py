@@ -4,6 +4,7 @@ import bukgen
 
 def force_update(*plugins):
     p = bukgen.bukkit.Parser()
+    p.config_type = 'full'
     for plugin in plugins:
         p.plugin(plugin)
 
