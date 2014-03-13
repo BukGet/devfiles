@@ -12,7 +12,7 @@ import datetime
 class LogParser(object):
     servers = ['dallas.vpn.bukget.org', 'paris.vpn.bukget.org']
     ignores = ['java', 'php', 'mozilla', 'chrome', 'opera', 'wget', 
-               'curl', 'urllib', 'bot', 'spider', 'apache']
+               'curl', 'urllib', 'bot', 'spider', 'apache', 'ruby']
     ua = re.compile(r'\"[^ ]*\" \"([^\(\/ ]*).*\"$')
     rcode = re.compile(r'HTTP/\d\.\d\" (\d{3})')
 
@@ -92,6 +92,7 @@ class LogParser(object):
             'api2': 0,
             'api3': 0,
             'unique': 0, 
+            'downloads': 0,
             'plugins': {},
             'user_agents': {},
             'bukkitdev': 0, 
@@ -149,12 +150,15 @@ class LogParser(object):
                         continue
                     if p not in plist: continue
                     if p not in data['plugins']:
-                        data['plugins'][p] = {'unique': 0, 'total': 0}
+                        data['plugins'][p] = {'unique': 0, 'total': 0, 'downloads': 0}
                         ipaddys[p] = []
                     if ip not in ipaddys[p]:
                         data['plugins'][p]['unique'] += 1
                         ipaddys[p].append(ip)
                     data['plugins'][p]['total'] += 1
+                    if '/download' in line:
+                        data['plugins'][p]['downloads'] += 1
+                        data['downloads'] += 1
             os.remove('/tmp/bukgetlogs/%s' % log)
         self.webstats.save(data)
 
@@ -166,6 +170,7 @@ class LogParser(object):
         day_trend = list(self.db.webstats.find().sort('_id', -1).limit(1))[0]
         week_trend = list(self.db.webstats.find().sort('_id', -1).limit(7))
         month_trend = list(self.db.webstats.find().sort('_id', -1).limit(30))
+        total_trend = list(self.db.webstats.find().sort('_id', -1))
 
         for plugin in self.plugins.find({}):
             # First
@@ -189,10 +194,16 @@ class LogParser(object):
                 if plugin['slug'] in day['plugins']:
                     monthly += day['plugins'][plugin['slug']]['unique']
 
+            total = 0
+            for day in total_trend:
+                if plugin['slug'] in day['plugins']:
+                    total += day['plugins'][plugin['slug']]['unique']
+
             # Now to add all of the new values to the plugin...
             plugin['popularity']['daily'] = daily
-            plugin['popularity']['weekly'] = weekly / 7
-            plugin['popularity']['monthly'] = monthly / 30
+            plugin['popularity']['weekly'] = weekly
+            plugin['popularity']['monthly'] = monthly
+            plugin['popularity']['total'] = total
 
             # Lastly save the changes :)
             self.plugins.save(plugin)
