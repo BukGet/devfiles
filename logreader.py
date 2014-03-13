@@ -92,7 +92,6 @@ class LogParser(object):
             'api2': 0,
             'api3': 0,
             'unique': 0, 
-            'downloads': 0,
             'plugins': {},
             'user_agents': {},
             'bukkitdev': 0, 
@@ -150,15 +149,12 @@ class LogParser(object):
                         continue
                     if p not in plist: continue
                     if p not in data['plugins']:
-                        data['plugins'][p] = {'unique': 0, 'total': 0, 'downloads': 0}
+                        data['plugins'][p] = {'unique': 0, 'total': 0}
                         ipaddys[p] = []
                     if ip not in ipaddys[p]:
                         data['plugins'][p]['unique'] += 1
                         ipaddys[p].append(ip)
                     data['plugins'][p]['total'] += 1
-                    if '/download' in line:
-                        data['plugins'][p]['downloads'] += 1
-                        data['downloads'] += 1
             os.remove('/tmp/bukgetlogs/%s' % log)
         self.webstats.save(data)
 
