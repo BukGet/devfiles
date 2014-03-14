@@ -18,7 +18,7 @@ class LogParser(object):
 
 
     def __init__(self):
-        self.conn = MongoClient()
+        self.conn = MongoClient()§
         self.db = self.conn.bukget
         self.webstats = self.db.webstats
         self.plugins = self.db.plugins
@@ -106,6 +106,8 @@ class LogParser(object):
             if log[-2:] != 'gz': continue
             lfile = gzip.open('/tmp/bukgetlogs/%s' % log)
             for line in lfile.readlines():
+                if 'BukGet-Monitor' in line:
+                    continue
                 # Get the IP Address
                 ip = ipaddy.findall(line)[0]
                 
@@ -146,8 +148,6 @@ class LogParser(object):
                 if len(plugin) > 0:
                     p = plugin[0]
                     if 'http://bukget.org/pages/stats.html' in line:
-                        continue
-                    if 'BukGet-Monitor' in line:
                         continue
                     if p not in plist: continue
                     if p not in data['plugins']:
