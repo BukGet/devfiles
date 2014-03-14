@@ -147,6 +147,8 @@ class LogParser(object):
                     p = plugin[0]
                     if 'http://bukget.org/pages/stats.html' in line:
                         continue
+                    if 'BukGet-Monitor' in line:
+                        continue
                     if p not in plist: continue
                     if p not in data['plugins']:
                         data['plugins'][p] = {'unique': 0, 'total': 0}
