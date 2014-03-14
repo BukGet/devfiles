@@ -18,7 +18,7 @@ class LogParser(object):
 
 
     def __init__(self):
-        self.conn = MongoClient()§
+        self.conn = MongoClient()
         self.db = self.conn.bukget
         self.webstats = self.db.webstats
         self.plugins = self.db.plugins
