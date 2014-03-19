@@ -152,6 +152,10 @@ def upgrade_api():
     if not files.exists('/etc/init/bukget.conf'):
         run('curl -o /etc/init/bukget.conf https://raw.github.com/BukGet/devfiles/master/templates/upstart.conf')
         run('initctl reload-configuration')
+    if not files.exists('/etc/init/nodeapi.conf'):
+        run('curl -o /etc/init/nodeapi.conf https://raw.github.com/BukGet/devfiles/master/templates/upstart_nodeapi.conf')
+        run('initctl reload-configuration')
+
 
 
 @task
@@ -281,6 +285,3 @@ def install_nodeapi():
         run('git clone git://github.com/BukGet/nodeapi.git')
     with cd('/opt/nodeapi'):
         run('npm install')    
-    cronjob = '@reboot root forever start /opt/nodeapi/index.js'
-    if not files.contains('/etc/crontab', cronjob):
-        files.append('/etc/crontab', cronjob)
