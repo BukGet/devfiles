@@ -282,6 +282,6 @@ def install_nodeapi():
     run('yum install npm')
     run('npm install -g forever')
     with cd('/opt'):
-        run('git clone git://github.com/BukGet/nodeapi.git')
+        run('git clone git://github.com/BukGet/api.git')
     with cd('/opt/nodeapi'):
         run('npm install')    
