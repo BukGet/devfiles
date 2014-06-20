@@ -84,6 +84,8 @@ def new_bukget():
     with cd('/opt'):
         run('git clone git://github.com/BukGet/bukget.git')
 
+
+    install_nodeapi()
     # Now it's time to actually install the API code.  This is actually fairly
     # easy as all of the packages we need are in the python package index.  The
     # process we will be using is the same as upgrading the code, so we will
@@ -147,11 +149,6 @@ def make_dev():
 @task
 def upgrade_api():
     '''Installs and Upgrades the BukGet API'''
-    with cd('/opt/bukget/api'):
-        run('pip install --upgrade ./')
-    if not files.exists('/etc/init/bukget.conf'):
-        run('curl -o /etc/init/bukget.conf https://raw.github.com/BukGet/devfiles/master/templates/upstart.conf')
-        run('initctl reload-configuration')
     if not files.exists('/etc/init/nodeapi.conf'):
         run('curl -o /etc/init/nodeapi.conf https://raw.github.com/BukGet/devfiles/master/templates/upstart_nodeapi.conf')
         run('initctl reload-configuration')
