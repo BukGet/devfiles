@@ -32,7 +32,7 @@ def new_bukget():
 
     # Next up, installing the EPEL & 10gen Repositories.
     run('yum -y install http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm')
-    run('curl -o /etc/yum.repos.d/10gen.repo https://raw.github.com/BukGet/devfiles/master/templates/10gen.repo')
+    run('curl -o /etc/yum.repos.d/10gen.repo https://raw.githubusercontent.com/BukGet/devfiles/master/templates/10gen.repo')
 
     # Next we will need to install the following packages:
     #  * python-devel               - Needed to byte-compile python libraries
@@ -57,8 +57,8 @@ def new_bukget():
     run('chkconfig --levels 2345 crond on')
 
     # Make the Necessary pulls for logrotate and cront o function properly.
-    run('curl -o /etc/logrotate.d/bukget https://raw.github.com/BukGet/devfiles/master/templates/logrotate.conf')
-    run('curl -o /etc/cron.d/0hourly https://raw.github.com/BukGet/devfiles/master/templates/cronhourlyfix.conf')
+    run('curl -o /etc/logrotate.d/bukget https://raw.githubusercontent.com/BukGet/devfiles/master/templates/logrotate.conf')
+    run('curl -o /etc/cron.d/0hourly https://raw.githubusercontent.com/BukGet/devfiles/master/templates/cronhourlyfix.conf')
 
     # A couple of things that we need to do for postfix, mainly update the
     # aliases to point root traffic to our group.
@@ -78,7 +78,7 @@ def new_bukget():
     # the BukGet packages.  Lets also clean up the tarball that the distribute
     # installation leaves behind.
     run('curl http://python-distribute.org/distribute_setup.py | python')
-    run('curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python')
+    run('curl https://raw.githubusercontent.com/pypa/pip/master/contrib/get-pip.py | python')
     run('rm -f distribute*.tar.gz')
 
     with cd('/opt'):
@@ -150,7 +150,7 @@ def make_dev():
 def upgrade_api():
     '''Installs and Upgrades the BukGet API'''
     if not files.exists('/etc/init/nodeapi.conf'):
-        run('curl -o /etc/init/nodeapi.conf https://raw.github.com/BukGet/devfiles/master/templates/upstart_nodeapi.conf')
+        run('curl -o /etc/init/nodeapi.conf https://raw.githubusercontent.com/BukGet/devfiles/master/templates/upstart_nodeapi.conf')
         run('initctl reload-configuration')
 
 
@@ -177,7 +177,7 @@ def config_nginx():
     # file is a pre-configured vhost for the bukget API.  We will need to
     # replace the hostname placeholder with the actual hostname.
     hostname = run('hostname')
-    run('curl -o /etc/nginx/conf.d/api.bukget.org.conf https://raw.github.com/BukGet/devfiles/master/templates/nginx_vhost.conf')
+    run('curl -o /etc/nginx/conf.d/api.bukget.org.conf https://raw.githubusercontent.com/BukGet/devfiles/master/templates/nginx_vhost.conf')
     files.sed('/etc/nginx/conf.d/api.bukget.org.conf', '@HOSTNAME@', hostname)
     run('service nginx restart')
 
@@ -270,7 +270,7 @@ def install_vmware_tools():
         # the packages needed for VMWare if the box is infact a vmware guest.
         run('rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub')
         run('rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub')
-        run('curl -o /etc/yum.repos.d/vmware-tools.repo https://raw.github.com/BukGet/devfiles/master/templates/vmware-tools.repo')
+        run('curl -o /etc/yum.repos.d/vmware-tools.repo https://raw.githubusercontent.com/BukGet/devfiles/master/templates/vmware-tools.repo')
         run('yum -y install vmware-tools-esx-kmods vmware-open-vm-tools-nox')
 
 @task
