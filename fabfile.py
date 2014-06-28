@@ -44,8 +44,8 @@ def new_bukget():
     #  * mongo-10gen-server         - The MongoDB Service itself
     #  * nginx                      - The front-end web server
     #  * anacron                    - A cron daemon
-    run('yum -y install python-devel libyaml libyaml-devel mongo-10gen mongo-10gen-server nginx ntp anacron npm')
-    run('npm install -g forever')
+    run('yum -y install python-devel libyaml libyaml-devel mongo-10gen mongo-10gen-server ntp anacron')
+
     # Lets make sure that time on this server does drift, so first fix the time
     # then enable the ntp service.
     run('ntpdate time.centos.org')
@@ -55,7 +55,6 @@ def new_bukget():
 
     # Lets go ahead and make sure that MongoDB and Nginx startup at boot.
     run('chkconfig --levels 2345 mongod on')
-    run('chkconfig --levels 2345 nginx on')
     run('chkconfig --levels 2345 postfix on')
     run('chkconfig --levels 2345 crond on')
 
@@ -68,7 +67,6 @@ def new_bukget():
     files.append('/etc/aliases', 'root:     staff@bukget.org')
     run('newaliases')
 
-    config_nginx()
     # As just about everything depends on this folder, lets go ahead and create
     # it ;)
     run('mkdir /var/log/bukget')
@@ -82,6 +80,11 @@ def new_bukget():
 
 @task
 def make_apiserver():  
+    run('yum -y install npm nginx')
+    run('npm install -g forever')
+    run('chkconfig --levels 2345 nginx on')
+    config_nginx()
+
     install_dnsupdater()
     install_nodeapi()
     install_geodns()
