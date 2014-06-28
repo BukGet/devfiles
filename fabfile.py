@@ -173,6 +173,7 @@ def config_nginx():
     # file is a pre-configured vhost for the bukget API.  We will need to
     # replace the hostname placeholder with the actual hostname.
     hostname = run('hostname')
+    run('rm -rf /etc/nginx/conf.d/default.conf')
     run('curl -o /etc/nginx/conf.d/api.bukget.org.conf https://raw.githubusercontent.com/BukGet/devfiles/master/templates/nginx_vhost.conf')
     files.sed('/etc/nginx/conf.d/api.bukget.org.conf', '@HOSTNAME@', hostname)
     run('service nginx restart')
