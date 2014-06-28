@@ -11,6 +11,8 @@ def new_bukget():
     '''Preps a fresh CentOS 6 installation and installs the BukGet services.'''
     env.warn_only = True        # Just setting this incase we need it.
 
+    distribute_keys()
+
     # First thing we need to do is update the system to current and install
     # the Development Tools package group as these will be used to build in
     # the python packages.
