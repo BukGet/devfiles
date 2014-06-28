@@ -290,6 +290,7 @@ def install_geodns():
     run('curl -o /opt/geodns/geodns https://raw.githubusercontent.com/BukGet/devfiles/master/geodns')
     with cd('/usr/share/GeoIP'):
         run('wget -N http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz')
+        run('rm -rf GeoIP.dat')
         run('gunzip GeoIP.dat.gz')
 
 @task
