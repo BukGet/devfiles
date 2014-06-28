@@ -94,8 +94,13 @@ def make_apiserver():
     # Now, lets start the api up.
     run('initctl reload-configuration')
     run('initctl start nodeapi')
-    run('initctl start dnsupdater')
     run('initctl start geodns')
+
+    print 'Don\'t forget to fix config.js for dnsupdater'
+
+@task
+def start_dnsupdater():
+    run('initctl start dnsupdater')
 
 @task
 def make_generator():
@@ -337,3 +342,9 @@ def setup_timezone():
     run('echo ZONE=\"UTC\" > /etc/sysconfig/clock')
     run('echo UTC=True >> /etc/sysconfig/clock')
     run('hwclock --systohc')
+    run('cp -f /usr/share/zoneinfo/UTC /etc/localtime')
+
+@task
+def update_devfiles():
+    with cd('/opt/devfiles'):
+        run('git pull')
