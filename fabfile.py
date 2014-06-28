@@ -75,6 +75,9 @@ def new_bukget():
     # Now we should be able to start all of these services up :D
     run('service postfix start')
 
+    with cd('/opt'):
+        run('git clone git://github.com/BukGet/devfiles.git devfiles')
+
 
     print 'Install & Prep Complete!  Please run make_generator or make_apiserver, and make_prod or make_dev.'
 
