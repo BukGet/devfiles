@@ -33,6 +33,8 @@ def new_bukget():
     # place, so lets just call that.
     hamachi()
 
+    run('yum -y remove httpd')
+
     # Next up, installing the EPEL & 10gen Repositories.
     run('yum -y install http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm')
     run('curl -o /etc/yum.repos.d/10gen.repo https://raw.githubusercontent.com/BukGet/devfiles/master/templates/10gen.repo')
