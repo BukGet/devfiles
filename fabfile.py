@@ -13,6 +13,8 @@ def new_bukget():
 
     distribute_keys()
 
+    setup_timezone()
+
     # First thing we need to do is update the system to current and install
     # the Development Tools package group as these will be used to build in
     # the python packages.
@@ -329,3 +331,9 @@ def distribute_keys(keyfile='/opt/keys/sshkeys'):
     run('chmod 0600 /root/.ssh/authorized_keys')
     run('chmod 0600 /root/.ssh/id_rsa')
     run('restorecon -R -v /root/.ssh')
+
+@task
+def setup_timezone():
+    run('echo ZONE=\"UTC\" > /etc/sysconfig/clock')
+    run('echo UTC=True >> /etc/sysconfig/clock')
+    run('hwclock --systohc')
