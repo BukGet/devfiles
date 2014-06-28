@@ -122,6 +122,7 @@ def make_prod():
     Makes the necessary configuration changes to turn a given host into a
     production API server.
     '''
+    env.warn_only = True 
     # Step 1: Turn on any services that dev servers have disabled by default:
     run('chkconfig --levels 2345 iptables on')
     if 'Firewall is not running' in run('service iptables status'):
