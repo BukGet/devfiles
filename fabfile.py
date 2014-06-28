@@ -344,8 +344,8 @@ def distribute_keys(keyfile='/opt/keys/sshkeys'):
 def setup_timezone():
     run('echo ZONE=\"UTC\" > /etc/sysconfig/clock')
     run('echo UTC=True >> /etc/sysconfig/clock')
-    run('hwclock --systohc')
     run('cp -f /usr/share/zoneinfo/UTC /etc/localtime')
+    run('hwclock --systohc')
 
 @task
 def update_devfiles():
