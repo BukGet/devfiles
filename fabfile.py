@@ -11,7 +11,6 @@ def new_bukget():
     '''Preps a fresh CentOS 6 installation and installs the BukGet services.'''
     env.warn_only = True        # Just setting this incase we need it.
 
-    send_sshkey()
     # First thing we need to do is update the system to current and install
     # the Development Tools package group as these will be used to build in
     # the python packages.
@@ -41,8 +40,8 @@ def new_bukget():
     #  * mongo-10gen-server         - The MongoDB Service itself
     #  * nginx                      - The front-end web server
     #  * anacron                    - A cron daemon
-    run('yum -y install python-devel libyaml libyaml-devel mongo-10gen mongo-10gen-server nginx ntp anacron')
-
+    run('yum -y install python-devel libyaml libyaml-devel mongo-10gen mongo-10gen-server nginx ntp anacron npm')
+    run('npm install -g forever')
     # Lets make sure that time on this server does drift, so first fix the time
     # then enable the ntp service.
     run('ntpdate time.centos.org')
@@ -70,32 +69,35 @@ def new_bukget():
     # it ;)
     run('mkdir /var/log/bukget')
 
+
     # Now we should be able to start all of these services up :D
-    run('service mongod start')
     run('service postfix start')
 
-    # Now, we need to install pip.  We use pip to pull in the dependencies for
-    # the BukGet packages.  Lets also clean up the tarball that the distribute
-    # installation leaves behind.
-    run('curl http://python-distribute.org/distribute_setup.py | python')
-    run('curl https://raw.githubusercontent.com/pypa/pip/master/contrib/get-pip.py | python')
-    run('rm -f distribute*.tar.gz')
 
-    with cd('/opt'):
-        run('git clone git://github.com/BukGet/bukget.git')
+    print 'Install & Prep Complete!  Please run make_generator or make_apiserver, and make_prod or make_dev.'
 
-
+@task
+def make_apiserver():  
+    install_dnsupdater()
     install_nodeapi()
-    # Now it's time to actually install the API code.  This is actually fairly
-    # easy as all of the packages we need are in the python package index.  The
-    # process we will be using is the same as upgrading the code, so we will
-    # just call that function.
-    upgrade_api()
+    install_geodns()
+
+    files.append('/etc/mongod.conf', 'slave = true')
+    files.append('/etc/mongod.conf', 'source = nj.vpn.bukget.org')
+
+    run('service mongod start')
 
     # Now, lets start the api up.
-    run('initctl start bukget')
-    print 'Install & Prep Complete!  Please run either make_prod or make_dev.'
+    run('initctl reload-configuration')
+    run('initctl start nodeapi')
+    run('initctl start dnsupdater')
+    run('initctl start geodns')
 
+@task
+def make_generator():
+    install_generator()
+    files.append('/etc/mongod.conf', 'master = true')
+    run('service mongod start')
 
 @task
 def make_prod():
@@ -144,29 +146,6 @@ def make_dev():
     run('service ip6tables stop')
     run('chkconfig iptables off')
     run('chkconfig ip6tables off')
-
-
-@task
-def upgrade_api():
-    '''Installs and Upgrades the BukGet API'''
-    if not files.exists('/etc/init/nodeapi.conf'):
-        run('curl -o /etc/init/nodeapi.conf https://raw.githubusercontent.com/BukGet/devfiles/master/templates/upstart_nodeapi.conf')
-        run('initctl reload-configuration')
-
-
-
-@task
-def upgrade_generator():
-    '''Installs and Upgrades the BukGen generation scripts.'''
-    with cd('/opt/bukget/bukgen'):
-        run('pip install --upgrade ./')
-    cronjob = '0 */6 *  *  * root /usr/bin/bukgen_bukkit speedy'
-    logreader = '50 0  *  *  * root python /opt/bukget/scripts/logreader.py'
-    if not files.contains('/etc/crontab', cronjob):
-        files.append('/etc/crontab', cronjob)
-    if not files.contains('/etc/crontab', logreader):
-        files.append('/etc/crontab', logreader)
-
 
 @task
 def config_nginx():
@@ -240,26 +219,6 @@ def dev_import_backup():
         run('tar xzf backup.tar.gz')
         run('mongorestore -d bukget --drop')
 
-
-@task(alias='sshkey')
-def send_sshkey(keyfile='/opt/keys/id_rsa.pub'):
-    env.warn_only = True        # We need this flag set for restorecon.  It only
-                                # exists for redhat hosts so it may not fire on
-                                # everything.
-    pubkey = open(keyfile).read()
-    if not files.exists('/root/.ssh'):
-        run('mkdir /root/.ssh')
-    if files.exists('/root/.ssh/authorized_keys') and files.contains('/root/.ssh/authorized_keys', pubkey):
-        pass
-    else:
-        if not files.exists('/root/.ssh/authorized_keys'):
-            run('touch /root/.ssh/authorized_keys')
-        files.append('/root/.ssh/authorized_keys', pubkey)
-    run('chmod 0700 /root/.ssh')
-    run('chmod 0600 /root/.ssh/authorized_keys')
-    run('restorecon -R -v /root/.ssh')
-
-
 @task
 def install_vmware_tools():
     '''VMWare Tools Installation.'''
@@ -274,11 +233,97 @@ def install_vmware_tools():
         run('yum -y install vmware-tools-esx-kmods vmware-open-vm-tools-nox')
 
 @task
+def install_dnsupdater():
+    '''DNSUpdater installatin.'''
+    run('curl -o /etc/init/dnsupdater.conf https://raw.githubusercontent.com/BukGet/devfiles/master/templates/upstart_dnsupdater.conf')
+    with cd('/opt'):
+        run('git clone git://github.com/BukGet/dnsupdater.git dnsupdater')
+    with cd('/opt/dnsupdater'):
+        run('npm install')    
+
+@task
+def upgrade_dnsupdater():
+   with cd('/opt/dnsupdater'):
+    run('git pull')
+    run('initctl stop dnsupdater')
+    run('initctl start dnsupdater')
+
+@task
 def install_nodeapi():
     '''NodeAPI Installation.'''
-    run('yum install npm')
-    run('npm install -g forever')
+    run('curl -o /etc/init/nodeapi.conf https://raw.githubusercontent.com/BukGet/devfiles/master/templates/upstart_nodeapi.conf')
     with cd('/opt'):
         run('git clone git://github.com/BukGet/api.git nodeapi')
     with cd('/opt/nodeapi'):
         run('npm install')    
+
+@task
+def upgrade_nodeapi():
+    with cd('/opt/nodeapi'):
+        run('git pull')
+        run('initctl stop nodeapi')
+        run('initctl start nodeapi')
+
+@task
+def install_geodns():
+    '''GeoDNS installation.'''
+    run('curl -o /etc/init/geodns.conf https://raw.githubusercontent.com/BukGet/devfiles/master/templates/upstart_geodns.conf')
+    if not files.exists('/opt/geodns'):
+        run('mkdir /opt/geodns')
+        run('mkdir /opt/geodns/dns')
+    run('curl -o /opt/geodns/dns/geodns.conf https://raw.githubusercontent.com/BukGet/devfiles/master/templates/geodns.conf')
+    run('curl -o /opt/geodns/geodns https://raw.githubusercontent.com/BukGet/devfiles/master/geodns')
+
+@task
+def upgrade_geodns():
+    with cd('/opt/geodns'):
+        run('curl -o /opt/geodns/geodns https://raw.githubusercontent.com/BukGet/devfiles/master/geodns')
+        run('initctl restart geodns')
+
+@task
+def install_generator():
+    run('curl http://python-distribute.org/distribute_setup.py | python')
+    run('curl https://raw.githubusercontent.com/pypa/pip/master/contrib/get-pip.py | python')
+    run('rm -f distribute*.tar.gz')
+    with cd('/opt'):
+        run('git clone git://github.com/BukGet/generator.git')
+    with cd('/opt/generator'):
+        run('pip install --upgrade ./')
+
+    cronjob = '0 */6 * * * root /usr/bin/bukgen_bukkit speedy'
+    cronjob_two = '0 1   * * 5 root /usr/bin/bukgen_bukkit speedy_full'
+    logreader = '30 5  * * * root python /opt/devfiles/logreader.py'
+    if not files.contains('/etc/crontab', cronjob):
+        files.append('/etc/crontab', cronjob)
+    if not files.contains('/etc/crontab', cronjob_two):
+        files.append('/etc/crontab', cronjob_two)
+    if not files.contains('/etc/crontab', logreader):
+        files.append('/etc/crontab', logreader)
+
+@task
+def upgrade_generator():
+    '''Installs and Upgrades the BukGen generation scripts.'''
+    with cd('/opt/generator'):
+        run('pip install --upgrade ./')
+
+@task
+def distribute_keys(keyfile='/opt/keys/sshkeys'):
+    pubkey = open(keyfile).read()
+    privkey = open('/opt/keys/id_rsa').read()
+    if not files.exists('/root/.ssh'):
+        run('mkdir /root/.ssh')
+    if files.exists('/root/.ssh/authorized_keys') and files.contains('/root/.ssh/authorized_keys', pubkey):
+        pass
+    else:
+        if not files.exists('/root/.ssh/authorized_keys'):
+            run('touch /root/.ssh/authorized_keys')
+        files.append('/root/.ssh/authorized_keys', pubkey)
+
+    if not files.exists('/root/.ssh/id_rsa'):
+        run('touch /root/.ssh/id_rsa')
+        files.append('/root/.ssh/id_rsa', privkey)
+
+    run('chmod 0700 /root/.ssh')
+    run('chmod 0600 /root/.ssh/authorized_keys')
+    run('chmod 0600 /root/.ssh/id_rsa')
+    run('restorecon -R -v /root/.ssh')

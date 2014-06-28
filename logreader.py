@@ -10,7 +10,7 @@ import time
 import datetime
 
 class LogParser(object):
-    servers = ['chicago.vpn.bukget.org', 'paris.vpn.bukget.org']
+    servers = ['ny.vpn.bukget.org', 'ca.vpn.bukget.org', 'de.vpn.bukget.org', 'fr.vpn.bukget.org']
     ignores = ['java', 'php', 'mozilla', 'chrome', 'opera', 'wget', 
                'curl', 'urllib', 'bot', 'spider', 'apache', 'ruby']
     ua = re.compile(r'\"[^ ]*\" \"([^\(\/ ]*).*\"$')
