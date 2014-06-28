@@ -367,3 +367,4 @@ def update_devfiles():
 def update_upstart():
     run('curl -o /etc/init/dnsupdater.conf https://raw.githubusercontent.com/BukGet/devfiles/master/templates/upstart_dnsupdater.conf')
     run('curl -o /etc/init/nodeapi.conf https://raw.githubusercontent.com/BukGet/devfiles/master/templates/upstart_nodeapi.conf')
+    run('initctl reload-configuration')
