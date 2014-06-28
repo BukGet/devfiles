@@ -144,6 +144,9 @@ def make_prod():
     # Hamachi is down & we have issues with the API servers.
     run('iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 22 --src 70.32.35.194 -j ACCEPT')
 
+    run('iptables -A INPUT -p tcp -m state --state NEW,ESTABLISHED -m tcp --dport 53 -j ACCEPT')
+    run('iptables -A INPUT -p udp -m state --state NEW,ESTABLISHED -m udp --dport 53 -j ACCEPT')
+
     # We also kinda need to enable port 80 for all the web traffic we expect ;)
     run('iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT')
 
