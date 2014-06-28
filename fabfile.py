@@ -44,7 +44,7 @@ def new_bukget():
     #  * mongo-10gen-server         - The MongoDB Service itself
     #  * nginx                      - The front-end web server
     #  * anacron                    - A cron daemon
-    run('yum -y install python-devel libyaml libyaml-devel mongo-10gen mongo-10gen-server ntp anacron htop')
+    run('yum -y install python-devel libyaml libyaml-devel mongo-10gen mongo-10gen-server ntp anacron htop postfix')
 
     # Lets make sure that time on this server does drift, so first fix the time
     # then enable the ntp service.
