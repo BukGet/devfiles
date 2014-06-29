@@ -1,18 +1,21 @@
 from fabric.api import *
 from fabric.contrib import *
 from fabfile.common import *
-from fabfile import apps
+import nodejs, mongo
 
 @task
 def install():
     '''
     Node.js BukGet API Implimentation installer
     '''
+    nodejs.install()
+    mongo.install()
     dl_template('upstart_nodeapi.conf', '/etc/init/nodeapi.conf')
     with cd('/opt'):
         run('git clone git://github.com/BukGet/api.git nodeapi')
     with cd('/opt/nodeapi'):
         run('npm install')
+    start()
 
 
 @task

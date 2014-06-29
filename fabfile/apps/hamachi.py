@@ -2,11 +2,12 @@ from fabric.api import *
 from fabric.contrib import *
 from fabfile.common import *
 
+
 @task
 def install():
-	'''
-	Hamachi Installation and Configuration.
-	'''
+    '''
+    Hamachi Installation and Configuration.
+    '''
     env.warn_only = True        # Just setting this incase we need it.
 
     # The first step is to install Hamachi.  As Hamachi depends on having the
@@ -31,15 +32,15 @@ def install():
 
 @task
 def start():
-	run('service logmein-hamachi start')
+    run('service logmein-hamachi start')
 
 
 @task
 def stop():
-	run('service logmein-hamachi stop')
+    run('service logmein-hamachi stop')
 
 
 @task
 def restart():
-	run('service logmein-hamachi stop')
-	run('service logmein-hamachi start')
+    run('service logmein-hamachi stop')
+    run('service logmein-hamachi start')

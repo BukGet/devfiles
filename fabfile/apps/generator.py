@@ -1,24 +1,24 @@
 from fabric.api import *
 from fabric.contrib import *
 from fabfile.common import *
-from fabfile import apps
+import mongo
 
 @task
 def install():
-	'''
-	Installs the BukGet generator system.
-	'''
-	
-	# First step is to install mongodb (if not already installed) and then make
+    '''
+    Installs the BukGet generator system.
+    '''
+    
+    # First step is to install mongodb (if not already installed) and then make
     # the mongodb environment a master.
-	apps.mongodb.install()
-	apps.mongodb.master()
+    mongo.install()
+    mongo.master()
 
     # Next we need to install the needed dependencies in order to actually use
     # this entertaining bit of python code.  This means installing the python
     # development headers, libyaml, and pip.
- 	yum('python-devel', 'libyaml', 'libyaml-devel')
- 	run('curl https://bootstrap.pypa.io/get-pip.py | python')
+    yum('python-devel', 'libyaml', 'libyaml-devel')
+    run('curl https://bootstrap.pypa.io/get-pip.py | python')
 
     # Next we will go ahead and clone the generator repository.
     with cd('/opt'):
