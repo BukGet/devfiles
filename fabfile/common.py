@@ -3,17 +3,13 @@ from fabric.contrib import *
 
 @task
 def installed(package):
+    env.warn_only = True        # Just setting this incase we need it.
     return not 'is not installed' in run('rpm -q %s' % package)
 
 
 @task
-def yum(*packages):
-    return run('yum -y install %s' % ' '.join(packages))
-
-
-@task
-def chkconfig(service, onoff, levels=None):
-    levels = 
+def yum(*packages, action='install'):
+    return run('yum -y %s %s' % (action, ' '.join(packages)))
 
 
 @task
