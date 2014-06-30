@@ -3,6 +3,7 @@ from fabric.contrib import *
 from fabfile.common import *
 import datetime
 
+
 @task
 def install():
     '''
@@ -47,6 +48,41 @@ def restore(backup, database):
             run('rm -rf /tmp/dump')
         run('tar xzf backup.tar.gz')
         run('mongorestore -d %s --drop' % database)
+
+
+@task
+def master():
+    '''
+    Converts a MongoDB instance to master.
+    '''
+    if files.exists('/var/lib/mongo/local.0'):
+        run('rm -f /var/lib/mongo.local.*')
+        files.sed('/etc/mongod.conf', r'^slave = true$', '')
+        files.sed('/etc/mongod.conf', r'^source = [a-z0-9]{2,3}.vpn.bukget.org$', '')
+    files.append('/etc/mongod.conf', 'master = true')
+    restart()
+
+
+@task
+def slave(master='nj.vpn.bukget.org'):
+    '''
+    Comverts a MongoDB instance to slave.
+    '''
+    files.sed('/etc/mongod.conf', r'^master = true\n$', '')
+    files.append('/etc/mongod.conf', '\n'.join([
+        'slave = true',
+        'source = %s' % master
+    ])
+    restart()
+
+
+@task
+def promote(master):
+    '''
+    Promotes a new master into the cluster.
+    '''
+    files.sed('/etc/mongod.conf', r'[a-z0-9]{2,3}.vpn.bukget.org', master)
+    restart()
 
 
 @task
