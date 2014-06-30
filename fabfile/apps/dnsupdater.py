@@ -14,6 +14,7 @@ def install():
         run('git clone git://github.com/BukGet/dnsupdater.git dnsupdater')
     with cd('/opt/dnsupdater'):
         run('npm install')
+    run('initctl reload-configuration')
     start()
 
 @task

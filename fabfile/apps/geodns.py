@@ -23,6 +23,7 @@ def install():
     dl_template('geodns.bin', '/opt/geodns/geodns')
     run('chmod 755 /opt/geodns/geodns')
     geoip_update()
+    run('initctl reload-configuration')
     start()
 
 

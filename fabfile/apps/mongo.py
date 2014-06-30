@@ -72,7 +72,7 @@ def slave(master='nj.vpn.bukget.org'):
     files.append('/etc/mongod.conf', '\n'.join([
         'slave = true',
         'source = %s' % master
-    ])
+    ]))
     restart()
 
 

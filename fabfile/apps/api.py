@@ -15,6 +15,7 @@ def install():
         run('git clone git://github.com/BukGet/api.git nodeapi')
     with cd('/opt/nodeapi'):
         run('npm install')
+    run('initctl reload-configuration')
     start()
 
 
