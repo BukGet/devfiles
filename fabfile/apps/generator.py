@@ -19,6 +19,7 @@ def install():
     # development headers, libyaml, and pip.
     yum('python-devel', 'libyaml', 'libyaml-devel')
     run('curl https://bootstrap.pypa.io/get-pip.py | python')
+    run('pip install fabric')
 
     # Next we will go ahead and clone the generator repository.
     with cd('/opt'):
@@ -38,7 +39,15 @@ def install():
     for job in cronjobs:
         if not files.contains('/etc/crontab', job):
             files.append('/etc/crontab', job)
-
+    run('ssh-keygen -t rsa -N ""')
+    key = run('cat /root/.ssh/id_rsa.pub')
+    print '\n'.join([
+        '\n[!] System Built.  Please update the authorized_keys template with',
+        '    the key below this message.  This key needs to be pushed out to',
+        '    the rest of the environment in order for things like logrotate',
+        '    to work.',
+    ])
+    print key
 
 @task
 def upgrade():
