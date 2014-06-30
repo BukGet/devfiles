@@ -4,6 +4,7 @@ from fabfile import base
 from fabfile import production
 from fabfile import development
 from fabfile import networking
+from fabfile import adhoc
 
 from fabric.api import env
 
