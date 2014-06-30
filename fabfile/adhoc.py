@@ -11,3 +11,12 @@ def remove_private_keys():
     '''
     run('rm -f /root/.ssh/id_rsa')
     run('restorecon -R -v /root/.ssh')
+
+
+@task
+def test():
+    '''
+    A simple test for checking to see if everything is setup correctly for
+    fabric.
+    '''
+    run('hostname')
