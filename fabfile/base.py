@@ -53,13 +53,15 @@ def prep():
 
 
 @task
-def update_time():
+def update_time(server='time.fragnet.net'):
     '''
     Forces a NTP sync and restarts the NTP daemon.
     '''
     if 'running' in run('service ntpd status'):
         service('ntpd', 'stop')
-    run('ntpdate time.centos.org')
+    files.comment('/etc/ntp.conf', r'^server .*$')
+    files.append('/etc/ntp.conf', 'server %s iburst' % server)
+    run('ntpdate %s' % server)
     service('ntpd', 'start')
 
 
