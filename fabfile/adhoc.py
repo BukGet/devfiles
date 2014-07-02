@@ -25,5 +25,6 @@ def test():
 @task
 def lce_client(pkg):
     put(pkg, '/tmp/lce-client.rpm')
-    yum('/tmp/lce-client.rpm')
-    run('opt/lce_client/set-server-ip.sh log.vpn.cugnet.net 31300')
+    yum('install', '/tmp/lce-client.rpm')
+    run('/opt/lce_client/set-server-ip.sh log.vpn.cugnet.net 31300')
+    run('rm -f /tmp/lce-client.rpm')
