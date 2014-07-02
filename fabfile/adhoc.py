@@ -23,7 +23,18 @@ def test():
 
 
 @task
+def logrotate():
+		'''
+		Manually run logrotate.
+		'''
+		run('logrotate -v /etc/logrotate.conf')
+
+
+@task
 def lce_client(pkg):
+    '''
+    Installs the LCE lce-client
+    '''
     put(pkg, '/tmp/lce-client.rpm')
     yum('install', '/tmp/lce-client.rpm')
     run('/opt/lce_client/set-server-ip.sh log.vpn.cugnet.net 31300')
