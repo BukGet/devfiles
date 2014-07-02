@@ -8,6 +8,10 @@ from fabfile import adhoc
 
 from fabric.api import env
 
+env.user = 'root'
+env.disable_known_hosts = True
+env.warn_only = True
+
 env.roledefs['api_us'] = ['ca.vpn.bukget.org', 'ny.vpn.bukget.org']
 env.roledefs['api_eu'] = ['fr.vpn.bukget.org', 'de.vpn.bukget.org']
 env.roledefs['generators'] = ['tx.vpn.bukget.org', 'nj.gen.bukget.org']
