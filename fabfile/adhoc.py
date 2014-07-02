@@ -20,3 +20,10 @@ def test():
     fabric.
     '''
     run('hostname')
+
+@task
+def logrotate():
+		'''
+		Manually run logrotate.
+		'''
+		run('logrotate -v /etc/logrotate.conf')
