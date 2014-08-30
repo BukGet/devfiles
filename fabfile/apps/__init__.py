@@ -4,3 +4,4 @@ from fabfile.apps import geodns
 from fabfile.apps import hamachi
 from fabfile.apps import nginx
 from fabfile.apps import nodejs
+from fabfile.apps import dnsupdater
