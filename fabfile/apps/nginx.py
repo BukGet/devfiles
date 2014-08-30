@@ -11,6 +11,7 @@ def install():
     # Lets check to see if Nginx is installed.  If it isnt, then lets go ahead
     # and install the package.
     if not installed('nginx'):
+        dl_template('nginx.repo', '/etc/yum.repos.d/nginx.repo')
         yum('nginx')
         run('chkconfig --levels 2345 on')
 
