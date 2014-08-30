@@ -19,6 +19,8 @@ def install():
     # replace the hostname placeholder with the actual hostname.
     hostname = run('hostname')
     run('rm -rf /etc/nginx/conf.d/default.conf')
+    with cd('/etc/nginx'):
+        run('openssl dhparam -out dh2048.pem 2048')
     dl_template('nginx_vhost.conf', '/etc/nginx/conf.d/api.bukget.org.conf')
     files.sed('/etc/nginx/conf.d/api.bukget.org.conf', '@HOSTNAME@', hostname)
 
