@@ -39,3 +39,6 @@ def lce_client(pkg):
     yum('install', '/tmp/lce-client.rpm')
     run('/opt/lce_client/set-server-ip.sh log.vpn.cugnet.net 31300')
     run('rm -f /tmp/lce-client.rpm')
+@task
+def upgrade_all_packages():
+    return run('yum -y update && yum -y upgrade')
