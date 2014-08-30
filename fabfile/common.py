@@ -23,3 +23,6 @@ def service(name, action, mech='service'):
         run('service %s %s' % (name, action))
     elif mech == 'initctl':
         run('initctl %s %s' % (action, name))
+
+def upgrade_all_packages():
+    return run('yum -y update && yum -y upgrade')
