@@ -7,7 +7,7 @@ def installed(package):
     return not 'is not installed' in run('rpm -q %s' % package)
 
 
-def yum(action='install', *packages):
+def yum(*packages,action='install'):
     return run('yum -y %s %s' % (action, ' '.join(packages)))
 
 

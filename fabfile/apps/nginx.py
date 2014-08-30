@@ -12,7 +12,7 @@ def install():
     # and install the package.
     if not installed('nginx'):
         dl_template('nginx.repo', '/etc/yum.repos.d/nginx.repo')
-        yum('nginx',action='install')
+        yum('nginx')
         run('chkconfig --levels 2345 on')
 
     # We will need to download the Nginx template config.  This config
