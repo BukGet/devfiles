@@ -36,4 +36,5 @@ def stop():
 
 @task
 def restart():
-    run('initctl restart dnsupdater')
+    stop()
+    start()
