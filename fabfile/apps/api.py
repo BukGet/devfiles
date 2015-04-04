@@ -23,6 +23,7 @@ def install():
 def upgrade():
     with cd('/opt/nodeapi'):
         run('git pull')
+        run('npm install')
     restart()
 
 
