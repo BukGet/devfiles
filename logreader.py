@@ -215,5 +215,7 @@ class LogParser(object):
 
 
 if __name__ == '__main__':
+    starttime = time.time()
     lp = LogParser()
     lp.run()
+    print '*** TOOK %s Seconds ***' % (time.time() - starttime)
