@@ -34,14 +34,22 @@ class LogParser(object):
         Perform all of the needed actions...
         '''
         starttime = time.time()
+        tnxtime = time.time()
         print '\n*** PULLING LOGS FROM REMOTE API SERVERS ***\n'
         for server in self.servers:
             self.get_log(server)
+        print '*** LOG PULLS TOOK %ss ***' % int(time.time() - tnxtime)
+
+        logtime = time.time()
         print '\n*** PARSING THE RAW LOG FILES ***\n'
         self.parse_logs()
+        print '*** LOG PARSING TOOK %ss ***' % int(time.time() - logtime)
+
+        popularitytime = time.time()
         print '\n*** RUNNING POPULARITY CONTEST ***\n'
         self.popularity()
-        print '*** LOGPARSE TOOK %s Seconds ***' % (time.time() - starttime)
+        print '*** POPULARITY CONTEST TOOK %ss ***' % int(time.time() - popularitytime)
+        print '*** LOGPARSE TOOK %s Seconds ***' % int(time.time() - starttime)
 
 
     def get_log(self, host):
@@ -157,7 +165,7 @@ class LogParser(object):
 
                 if len(plugin) > 0:
                     p = plugin[0]
-                    if 'http://bukget.org/pages/stats.html' in line:
+                    if 'https://bukget.org/pages/stats.html' in line:
                         continue
                     if p not in plist: continue
                     if p not in data['plugins']:
