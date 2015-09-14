@@ -33,10 +33,15 @@ class LogParser(object):
         '''
         Perform all of the needed actions...
         '''
+        starttime = time.time()
+        print '\n*** PULLING LOGS FROM REMOTE API SERVERS ***\n'
         for server in self.servers:
             self.get_log(server)
+        print '\n*** PARSING THE RAW LOG FILES ***\n'
         self.parse_logs()
+        print '\n*** RUNNING POPULARITY CONTEST ***\n'
         self.popularity()
+        print '*** LOGPARSE TOOK %s Seconds ***' % (time.time() - starttime)
 
 
     def get_log(self, host):
@@ -89,7 +94,7 @@ class LogParser(object):
 
     def parse_logs(self):
         '''
-        Log Marsing Function
+        Log Parsing Function
         '''
         data = {
             'total': 0,
@@ -215,7 +220,5 @@ class LogParser(object):
 
 
 if __name__ == '__main__':
-    starttime = time.time()
     lp = LogParser()
     lp.run()
-    print '*** TOOK %s Seconds ***' % (time.time() - starttime)
