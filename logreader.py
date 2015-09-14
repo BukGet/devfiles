@@ -165,7 +165,7 @@ class LogParser(object):
 
                 if len(plugin) > 0:
                     p = plugin[0]
-                    if 'https://bukget.org/pages/stats.html' in line:
+                    if 'https://bukget.org' in line:
                         continue
                     if p not in plist: continue
                     if p not in data['plugins']:
