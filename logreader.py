@@ -10,7 +10,12 @@ import time
 import datetime
 
 class LogParser(object):
-    servers = ['ny.vpn.bukget.org', 'ca.vpn.bukget.org', 'de.vpn.bukget.org', 'fr.vpn.bukget.org']
+    servers = [
+        'ny.vpn.bukget.org', 
+        'ca.vpn.bukget.org', 
+        'de.vpn.bukget.org', 
+        'fr.vpn.bukget.org'
+    ]
     ignores = ['java', 'php', 'mozilla', 'chrome', 'opera', 'wget', 
                'curl', 'urllib', 'bot', 'spider', 'apache', 'ruby']
     ua = re.compile(r'\"[^ ]*\" \"([^\(\/ ]*).*\"$')
@@ -170,7 +175,9 @@ class LogParser(object):
         month_trend = list(self.db.webstats.find().sort('_id', -1).limit(30))
         total_trend = list(self.db.webstats.find().sort('_id', -1))
 
-        for plugin in self.plugins.find({}):
+        results = self.plugins.find({})
+        results.batch_size(10)
+        for plugin in results:
             # First
             if 'popularity' not in plugin:
                 plugin['popularity'] = {}
